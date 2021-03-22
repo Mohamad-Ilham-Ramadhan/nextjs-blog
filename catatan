@@ -1,0 +1,58 @@
+== Pre-rendering ==
+1. Static generation => is the pre-rendering method that generates the HTML at build time. The pre-rendered HTML is then reused on each request.
+2. Server-side rendering => is the pre-rendering method that generates the HTML on each request. (Digunakan pada development `npm run dev`)
+
+== Static Generation `getStaticProps` ==
+ - Next.js bisa membuat "hybrid" Next.js app dengan gabungan static generation dan server-side rendering pada halaman2 tertentu.
+
+ - Next.js merekomendasikan menggunakan Static Generation sebisa mungkin dengan atau tanpa data, karena lebih cepat, di build sekali, dan di serve lewat CDN.
+
+ - Pertanyaannya "Dapatkah saya mempre-render halaman ini sebelum user request?" Kalo bisa maka gunakan Static Generation.
+
+ - Static Generation bukan ide bagus jika halaman sering update datanya dan bisa berubah2 tiap request (datanya up to date).
+
+ - Static Generation dengan data menggunakan `getStaticProps`, run at build time.
+
+ - Pada development mode `getStaticProps` run on each request.
+
+ - `getStaticProps` hanya jalan pada server side. Jadi jika kita query ke database didalamnya, kita tidak perlu khawatir... bahkan tidak dimasukan pada JS bundle hasil build.
+
+ - `getStaticProps` tidak bisa menggunakan data yang tersedia pada saat request seperti (query parameter atau HTTP headers).
+
+ - `getStaticProps` hanya bisa di gunakan pada Page (component yang ada di pages folder). Gak bisa kita gunakan di non-page files.
+
+== Server-side Rendering `getServerSideProps` ==
+
+export async function getServerSideProps(context) {
+  return {
+    props: {
+      // props for your component
+    }
+  }
+}
+
+- parameter `context` mengadung unsur2 yang ada pada request seperti HTTP headers, query parameters, HTTP method dan lain-lain.
+
+
+== Client-side pre-rendering ==
+- Statically generate page yang tidak butun data, lalu fetch data dengan javascript.
+- This approach works well for user dashboard pages, for example. Because a dashboard is a private, user-specific page, SEO is not relevant, and the page doesn’t need to be pre-rendered. The data is frequently updated, which requires request-time data fetching.
+
+== Dynamic routing == 
+/posts/[id]
+- `getStaticPath` => return all possible list for query parameters [id]
+  return {
+    paths: [
+      {
+        params: {
+          [params]: ... // => id: 'page-1'
+        }
+        fallback: true/false
+      }
+    ]
+  }
+- `getStaticProps({params}) => `params` hasil dari [id] request.
+
+- `getStaticPath` pada development berjalan tiap request, pada production berjalan hanya build time saja.
+
+- fallback: false => return 404 page.
